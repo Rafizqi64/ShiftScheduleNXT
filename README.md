@@ -19,8 +19,9 @@ The following shifts are used in the script:
 - **L (Late Shift)**: 18:00 - 02:00 (next day)
 
 
-### Installation
+### Installation if you want to be fancy
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/shift-schedule-fre
+   git clone https://github.com/Rafizqi64/ShiftScheduleNXT.git
+   
