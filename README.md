@@ -1,6 +1,6 @@
 # Shift Schedule Free Time Finder
 Hello beautiful people!
-This Python script helps you find free time between two people based on their shift schedules. The program uses a predefined 6-week shift schedule which can be edited and takes into account specific shifts such as Day, Night, and Late shifts. Additionally, the program adjusts for sleeping hours based on shift types and finds common free hours for both people.
+This Python script helps you find free time between two shifts based on their shift schedules. The program uses a predefined 6-week shift schedule which can be edited and takes into account specific shifts such as Day, Night, and Late shifts. Additionally, the program adjusts for sleeping hours based on shift types and finds common free hours for both shifts.
 
 ### Features
 - **Input**: Allows the user to input the start week and date in the GMP format `DD-MMM-YY`.
