@@ -16,7 +16,7 @@ def get_shift_hours(shift_type):
         return set(range(start, end))  # Normal shift time (same day)
     else:
         # For shifts that cross midnight (like 'L' 18:00-02:00)
-        return set(range(start, 24)) | set(range(24, 24 + end))
+        return set(range(start, 24)) | set(range(0, end))
 
 # Static 6-week schedule (same for everyone)
 # Each week is a list of shifts for each day (7 days per week)
@@ -40,12 +40,18 @@ shift_to_week = {
 }
 
 # Function to calculate free time between multiple people
-def find_free_time(start_weeks):
+def find_free_time(start_weeks, start_date):
     num_people = len(start_weeks)
     free_times = defaultdict(lambda: defaultdict(set))
     
-    for week_offset in range(6):  # Compare 6 weeks
-        weeks = [(shift_to_week[start_week] + week_offset) % 6 for start_week in start_weeks]
+    # Calculate the reference date (5th of May)
+    reference_date = datetime.strptime("05-May-2025", "%d-%b-%Y")
+    
+    # Calculate the week offset from the reference date
+    week_offset = (start_date - reference_date).days // 7
+    
+    for offset in range(6):  # Compare 6 weeks
+        weeks = [(shift_to_week[start_week] + week_offset + offset) % 6 for start_week in start_weeks]
         
         for day in range(7):
             busy_hours = [set() for _ in range(num_people)]
@@ -62,7 +68,7 @@ def find_free_time(start_weeks):
             common_free = set.intersection(*free_hours)
 
             if common_free:
-                free_times[(week_offset, *weeks)][day] = common_free
+                free_times[(offset, *weeks)][day] = common_free
 
     return free_times
 
@@ -148,14 +154,30 @@ def filter_short_periods(filtered_free_times):
 
 # Get user input for the start weeks and start date
 num_people = int(input("Enter the number of people: "))
-start_weeks = [input(f"Enter the start week for Person {i + 1} (A-F): ").upper() for i in range(num_people)]
-start_date_str = input("Enter the start date GMP wise (DD-MMM-YY): ")
+start_weeks = []
+for i in range(num_people):
+    while True:
+        start_week = input(f"Enter the shift for Person {i + 1} (A-F): ").upper()
+        if start_week in shift_to_week:
+            start_weeks.append(start_week)
+            break
+        else:
+            print("Invalid input. Please enter a valid shift (A-F).")
 
-# Convert the start date string to a datetime object
-start_date = datetime.strptime(start_date_str, "%d-%b-%y")
+while True:
+    start_date_str = input("Enter the start date GMP wise (DD-MMM-YY): ")
+    start_date = datetime.strptime(start_date_str, "%d-%b-%y")
+    reference_date = datetime.strptime("05-May-2025", "%d-%b-%Y")
+    if start_date >= reference_date:
+        break
+    else:
+        print("Invalid date. Please enter a date on or after 5th May 2025.")
+
+# Adjust the input date to the nearest Monday
+start_date = start_date - timedelta(days=start_date.weekday())
 
 # Example: Finding free time between multiple people
-free_time = find_free_time(start_weeks)
+free_time = find_free_time(start_weeks, start_date)
 filtered_free_time = filter_unusual_times(free_time)
 cleaned_free_time = filter_short_periods(filtered_free_time)
 
