@@ -1,5 +1,7 @@
 from collections import defaultdict
 from datetime import datetime, timedelta
+import tkinter as tk
+from tkinter import messagebox
 
 # Define the shift times as hour ranges (in 24-hour format)
 shift_times = {
@@ -152,48 +154,75 @@ def filter_short_periods(filtered_free_times):
 
     return cleaned_free_times
 
-# Get user input for the start weeks and start date
-num_people = int(input("Enter the number of people: "))
-start_weeks = []
-for i in range(num_people):
-    while True:
-        start_week = input(f"Enter the shift for Person {i + 1} (A-F): ").upper()
-        if start_week in shift_to_week:
+def calculate_free_time():
+    try:
+        num_people = int(num_people_entry.get())
+        start_weeks = []
+        for i in range(num_people):
+            start_week = start_weeks_entries[i].get().upper()
+            if start_week not in shift_to_week:
+                raise ValueError(f"Invalid shift for Person {i + 1}. Please enter a valid shift (A-F).")
             start_weeks.append(start_week)
-            break
-        else:
-            print("Invalid input. Please enter a valid shift (A-F).")
 
-while True:
-    start_date_str = input("Enter the start date GMP wise (DD-MMM-YY): ")
-    start_date = datetime.strptime(start_date_str, "%d-%b-%y")
-    reference_date = datetime.strptime("05-May-2025", "%d-%b-%Y")
-    if start_date >= reference_date:
-        break
-    else:
-        print("Invalid date. Please enter a date on or after 5th May 2025.")
+        start_date_str = start_date_entry.get()
+        start_date = datetime.strptime(start_date_str, "%d-%b-%y")
+        reference_date = datetime.strptime("05-May-2025", "%d-%b-%Y")
+        if start_date < reference_date:
+            raise ValueError("Invalid date. Please enter a date on or after 5th May 2025.")
 
-# Adjust the input date to the nearest Monday
-start_date = start_date - timedelta(days=start_date.weekday())
+        # Adjust the input date to the nearest Monday
+        start_date = start_date - timedelta(days=start_date.weekday())
 
-# Example: Finding free time between multiple people
-free_time = find_free_time(start_weeks, start_date)
-filtered_free_time = filter_unusual_times(free_time)
-cleaned_free_time = filter_short_periods(filtered_free_time)
+        # Calculate free time
+        free_time = find_free_time(start_weeks, start_date)
+        filtered_free_time = filter_unusual_times(free_time)
+        cleaned_free_time = filter_short_periods(filtered_free_time)
 
-# Display the filtered results with dates in a "prettier" format
-print("\n=== Free Time Schedule ===\n")
-for (week_offset, *weeks), days in cleaned_free_time.items():
-    weeks_str = ', '.join([f"P{i + 1} Week {week + 1}" for i, week in enumerate(weeks)])
-    print(f"--- Week {week_offset + 1} ({weeks_str}) ---")
-    for day in range(7):  # Ensure all days are displayed
-        day_name = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][day]
-        current_date = start_date + timedelta(days=day + week_offset * 7)
-        formatted_date = current_date.strftime("%d-%b-%y")
-        
-        if day in days:
-            formatted_hours = [f"{hour:02}:00" for hour in sorted(days[day])]
-            print(f"  {day_name} ({formatted_date}): {', '.join(formatted_hours)}")
-        else:
-            print(f"  {day_name} ({formatted_date}): No common free hours")
-    print("\n")
+        # Display the results
+        result_text.delete(1.0, tk.END)
+        result_text.insert(tk.END, "\n=== Free Time Schedule ===\n")
+        for (week_offset, *weeks), days in cleaned_free_time.items():
+            weeks_str = ', '.join([f"P{i + 1} Week {week + 1}" for i, week in enumerate(weeks)])
+            result_text.insert(tk.END, f"--- Week {week_offset + 1} ({weeks_str}) ---\n")
+            for day in range(7):  # Ensure all days are displayed
+                day_name = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"][day]
+                current_date = start_date + timedelta(days=day + week_offset * 7)
+                formatted_date = current_date.strftime("%d-%b-%y")
+                
+                if day in days:
+                    formatted_hours = [f"{hour:02}:00" for hour in sorted(days[day])]
+                    result_text.insert(tk.END, f"  {day_name} ({formatted_date}): {', '.join(formatted_hours)}\n")
+                else:
+                    result_text.insert(tk.END, f"  {day_name} ({formatted_date}): No common free hours\n")
+            result_text.insert(tk.END, "\n")
+    except Exception as e:
+        messagebox.showerror("Error", str(e))
+
+# Create the main window
+root = tk.Tk()
+root.title("Free Time Scheduler")
+
+# Create and place the widgets
+tk.Label(root, text="Enter the number of people:").grid(row=0, column=0, padx=10, pady=5)
+num_people_entry = tk.Entry(root)
+num_people_entry.grid(row=0, column=1, padx=10, pady=5)
+
+start_weeks_entries = []
+for i in range(6):  # Assuming a maximum of 6 people
+    tk.Label(root, text=f"Enter the start week for Person {i + 1} (A-F):").grid(row=i + 1, column=0, padx=10, pady=5)
+    entry = tk.Entry(root)
+    entry.grid(row=i + 1, column=1, padx=10, pady=5)
+    start_weeks_entries.append(entry)
+
+tk.Label(root, text="Enter the start date GMP wise (DD-MMM-YY):").grid(row=7, column=0, padx=10, pady=5)
+start_date_entry = tk.Entry(root)
+start_date_entry.grid(row=7, column=1, padx=10, pady=5)
+
+calculate_button = tk.Button(root, text="Calculate Free Time", command=calculate_free_time)
+calculate_button.grid(row=8, column=0, columnspan=2, padx=10, pady=10)
+
+result_text = tk.Text(root, width=80, height=20)
+result_text.grid(row=9, column=0, columnspan=2, padx=10, pady=10)
+
+# Run the main loop
+root.mainloop()
