@@ -33,12 +33,12 @@ static_schedule = [
 
 # Map shifts A-F to week numbers 0-5
 shift_to_week = {
-    'A': 0,
-    'B': 1,
-    'C': 2,
-    'D': 3,
-    'E': 4,
-    'F': 5
+    'D': 0,
+    'E': 1,
+    'F': 2,
+    'A': 3,
+    'B': 4,
+    'C': 5
 }
 
 # Function to calculate free time between multiple people
@@ -166,7 +166,7 @@ def calculate_free_time():
 
         start_date_str = start_date_entry.get()
         start_date = datetime.strptime(start_date_str, "%d-%b-%y")
-        reference_date = datetime.strptime("05-May-2025", "%d-%b-%Y")
+        reference_date = datetime.strptime("28-APR-2025", "%d-%b-%Y")
         if start_date < reference_date:
             raise ValueError("Invalid date. Please enter a date on or after 5th May 2025.")
 
@@ -209,7 +209,7 @@ num_people_entry.grid(row=0, column=1, padx=10, pady=5)
 
 start_weeks_entries = []
 for i in range(6):  # Assuming a maximum of 6 people
-    tk.Label(root, text=f"Enter the start week for Person {i + 1} (A-F):").grid(row=i + 1, column=0, padx=10, pady=5)
+    tk.Label(root, text=f"Enter the shift for Person {i + 1} (A-F):").grid(row=i + 1, column=0, padx=10, pady=5)
     entry = tk.Entry(root)
     entry.grid(row=i + 1, column=1, padx=10, pady=5)
     start_weeks_entries.append(entry)
