@@ -165,12 +165,29 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
         free_time = shared_free_times.get(date, [])
         day_record["Shared Free Hours"] = ', '.join(group_hours_to_ranges(free_time)) if free_time else "No free hours"
 
+        shifts_today = {}
+        shifts_next_day = {}
+
         for idx, person in enumerate(people):
             shift = ', '.join(people[person][date]["shift"]) or "-"
             shift_code = person[-2]
             day_record[f"Shift {shift_code}"] = f"{shift}"
             person_index = (shift_to_week[shift_code] - 1 + (list(all_dates).index(date) // 7)) % 6 + 1
             day_record[f"Week {shift_code}"] = f"Week {person_index}"
+            shifts_today[shift_code] = shift
+
+            # Look ahead to next day for N shifts
+            if i + 1 < len(filtered_dates):
+                next_day = filtered_dates[i + 1]
+                next_shift = ', '.join(people[person][next_day]["shift"]) or "-"
+                shifts_next_day[shift_code] = next_shift
+
+        # Sleepover logic: must include at least 20:00 and 1:00, and no N shifts next day
+        sleepover_possible = (
+            any(h in free_time for h in [20, 21, 22, 23, 0, 1]) and
+            all('N' not in shifts_next_day.get(code, '') for code in shifts_next_day)
+        )
+        day_record["Sleepover?"] = "✅" if sleepover_possible else "❌"
 
         annotated_output.append(day_record)
 
