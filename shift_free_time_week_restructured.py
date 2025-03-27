@@ -3,29 +3,30 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import pandas as pd
 
-# Constants
+# Constants for scheduling logic
 START_DATE = datetime(2025, 4, 28)
 NUM_WEEKS = 6
 DAYS_PER_WEEK = 7
 
-# Shift times
+# Define shift start and end hours (24-hour format)
 shift_times = {
-    'E': (6, 14),
-    'N': (0, 8),
-    'D': (12, 20),
-    'L': (18, 2)
+    'E': (6, 14),   # Early: 6am - 2pm
+    'N': (0, 8),    # Night: 12am - 8am
+    'D': (12, 20),  # Day: 12pm - 8pm
+    'L': (18, 2)    # Late: 6pm - 2am next day
 }
 
-# Sleep filters
+# Sleep time restrictions per shift type
 sleep_hours = {
     'N': set(range(9, 18)),
     'L': set(range(3, 12)),
     'E': set(range(22, 24)).union(range(0, 4))
 }
 
+# Hours generally considered free for socializing
 usual_hours = set(range(10, 24)).union(range(0, 2))
 
-# Static 6-week schedule
+# The 6-week static schedule that rotates among shifts
 static_schedule = [
     {0: ['D'], 1: ['D'], 2: ['D'], 3: [], 4: ['E'], 5: ['E'], 6: ['E']},
     {0: [], 1: [], 2: [], 3: ['L'], 4: ['L'], 5: [], 6: ['N']},
@@ -35,6 +36,7 @@ static_schedule = [
     {0: [], 1: ['L'], 2: ['L'], 3: [], 4: ['N'], 5: ['N'], 6: []},
 ]
 
+# Map shift labels (A–F) to their respective starting weeks
 shift_to_week = {
     'A': 5,
     'B': 1,
@@ -44,9 +46,11 @@ shift_to_week = {
     'F': 4
 }
 
+# Function to generate the full list of dates in the schedule
 def generate_dates():
     return [START_DATE + timedelta(days=i) for i in range(NUM_WEEKS * DAYS_PER_WEEK)]
 
+# Given a shift letter, rotate the static schedule to match its start week
 def rotate_schedule(shift_letter):
     start_week_index = shift_to_week[shift_letter] - 1
     full_schedule = []
@@ -55,6 +59,7 @@ def rotate_schedule(shift_letter):
         full_schedule.append(static_schedule[week_index])
     return full_schedule
 
+# Expand a shift into its actual working hours
 def expand_shift_hours(shift_code):
     start, end = shift_times[shift_code]
     if end > start:
@@ -62,6 +67,7 @@ def expand_shift_hours(shift_code):
     else:
         return set(range(start, 24)).union(range(0, end))
 
+# Build the busy schedule map per person based on their shift rotation
 def build_busy_map(person_shift_letter):
     schedule = rotate_schedule(person_shift_letter)
     busy_by_date = {}
@@ -89,6 +95,7 @@ def build_busy_map(person_shift_letter):
 
     return busy_by_date
 
+# Apply sleep filters and late-night overflow logic
 def apply_sleep_filters(busy_map):
     dates = sorted(busy_map.keys())
     for i, date in enumerate(dates):
@@ -113,6 +120,7 @@ def apply_sleep_filters(busy_map):
 
     return busy_map
 
+# Compute hours where all selected people are free
 def compute_shared_free_times(people):
     shared_free_by_date = {}
     all_dates = sorted(next(iter(people.values())).keys())
@@ -130,14 +138,21 @@ def compute_shared_free_times(people):
 
     return shared_free_by_date
 
+# Generate annotated calendar with shifts, weeks, and shared free time
 def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_from):
     annotated_output = []
     all_dates = sorted(next(iter(people.values())).keys())
     filtered_dates = [d for d in all_dates if d >= start_from]
 
+    # Define shift colors for highlighting
+    shift_colors = {
+        'E': 'background-color: #ADD8E6;',   # Light blue
+        'D': 'background-color: #90EE90;',   # Light green
+        'L': 'background-color: #FFFF99;',   # Light yellow
+        'N': 'background-color: #FFA07A;'    # Light orange
+    }
 
     for i, date in enumerate(filtered_dates):
-
         day_record = {"Date": str(date)}
         free_time = shared_free_times.get(date, [])
         if free_time:
@@ -156,7 +171,7 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
 
     return pd.DataFrame(annotated_output)
 
-# Streamlit UI
+# Streamlit user interface
 st.title("thank u, NXT: Free Time Calendar")
 #st.image("shift_schedule.png", caption="Static 6-week Schedule", use_column_width=True)
 st.write("Compare shifts and find overlapping free hours across 6 weeks.")
@@ -177,6 +192,24 @@ if st.button("Show Shared Calendar"):
     }
     shared_free_times = compute_shared_free_times(people)
     annotated_df = annotate_schedule_with_shifts_and_weeks(people, shared_free_times, selected_date)
-    st.dataframe(annotated_df.style.applymap(lambda v: 'background-color: :00' if isinstance(v, str) and ":00" in v else ''), use_container_width=True)
-    st.download_button("Download CSV", annotated_df.to_csv(index=False), "shared_calendar.csv")
 
+    # Highlight free hours and shifts with color
+    def highlight_cells(val):
+          if isinstance(val, str):
+            if ':00' in val:
+                return 'background-color: #D0F0C0; color: #006400;'
+            elif val.startswith('E'):
+                return 'background-color: #ADD8E6; color: #00008B;'  # Blue with navy text
+            elif val.startswith('D'):
+                return 'background-color: #90EE90; color: #006400;'  # Green with dark green text
+            elif val.startswith('L'):
+                return 'background-color: #FFFF99; color: #8B8000;'  # Yellow with dark yellow/brown
+            elif val.startswith('N'):
+                return 'background-color: #FFA07A; color: #8B0000;'  # Orange with dark red
+          return ''
+
+    st.dataframe(
+        annotated_df.style.applymap(highlight_cells),
+        use_container_width=True
+    )
+    st.download_button("Download CSV", annotated_df.to_csv(index=False), "shared_calendar.csv")
