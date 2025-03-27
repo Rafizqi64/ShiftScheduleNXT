@@ -32,7 +32,8 @@ Our full 6-week rotation in living color:
 | L    | Late       | 18:00–02:00* | 🟡 Yellow  |
 | N    | Night      | 00:00–08:00  | 🔶 Orange  |
 
-* Late shifts actually roll over to the next day!
+> *Late shifts actually roll over to the next day!
+~~such a f@$%ing headache.~~
 ---
 
 ## 🚀 How to Run It
