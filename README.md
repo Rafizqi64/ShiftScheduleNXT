@@ -15,7 +15,7 @@ Whether you're trying to plan a group dinner, some well-earned parties, or just 
 - 🔍 **Highlights only social-friendly hours** (no 4am nonsense here)
 - 🗖️ **Displays a calendar** of days, showing when you're all available
 - 🎨 **Color-coded shifts** so you can read the table at a glance
-- 📅 Easily **download the schedule as a CSV** to share with others
+- 📅 **Shows sleepover possibilities** wherever possible
 
 ---
 
