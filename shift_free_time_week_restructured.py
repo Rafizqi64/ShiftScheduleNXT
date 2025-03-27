@@ -18,9 +18,9 @@ shift_times = {
 
 # Sleep time restrictions per shift type
 sleep_hours = {
-    'N': set(range(9, 18)),
-    'L': set(range(3, 12)),
-    'E': set(range(22, 24)).union(range(0, 4))
+    'N': set(range(9, 18)),                         # Before and after shift sleep: 9am - 6pm
+    'L': set(range(3, 12)),                         # After shift sleep: 3am - 12pm
+    'E': set(range(22, 24)).union(range(0, 4))      # Before shift sleep: 10pm - 4am
 }
 
 # Hours generally considered free for socializing
