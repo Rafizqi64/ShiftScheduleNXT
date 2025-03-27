@@ -18,9 +18,9 @@ shift_times = {
 
 # Sleep time restrictions per shift type
 sleep_hours = {
-    'N': set(range(9, 18)),
-    'L': set(range(3, 12)),
-    'E': set(range(22, 24)).union(range(0, 4))
+    'N': set(range(9, 18)),                         # Before and after shift sleep: 9am - 6pm
+    'L': set(range(3, 12)),                         # After shift sleep: 3am - 12pm
+    'E': set(range(22, 24)).union(range(0, 4))      # Before shift sleep: 10pm - 4am
 }
 
 # Hours generally considered free for socializing
@@ -187,7 +187,7 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
             any(h in free_time for h in [20, 21, 22, 23, 0, 1]) and
             all('N' not in shifts_next_day.get(code, '') for code in shifts_next_day)
         )
-        day_record["Sleepover?"] = "✅" if sleepover_possible else "❌"
+        day_record["Sleepover possible?"] = "✅" if sleepover_possible else "❌"
 
         annotated_output.append(day_record)
 
@@ -207,6 +207,8 @@ for i in range(num_people):
 
 selected_date = st.date_input("Start from date", datetime(2025, 4, 28))
 
+show_sleepover = st.checkbox("Show Sleepover Column", value=True)
+
 if st.button("Show Shared Calendar"):
     people = {
         f"P{i+1} ({shift})": apply_sleep_filters(build_busy_map(shift))
@@ -214,6 +216,8 @@ if st.button("Show Shared Calendar"):
     }
     shared_free_times = compute_shared_free_times(people)
     annotated_df = annotate_schedule_with_shifts_and_weeks(people, shared_free_times, selected_date)
+    if not show_sleepover and "Sleepover possible?" in annotated_df.columns:
+        annotated_df = annotated_df.drop(columns=["Sleepover possible?"])
 
     def highlight_cells(val):
         if isinstance(val, str):
