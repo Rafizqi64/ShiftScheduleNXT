@@ -1,4 +1,4 @@
-# 🌟 Shift Schedule Free Time Finder – *thank u, NXT edition* 🕒
+# thank u, NXT – *Shift Schedule Free Time Finder* 🕒
 
 **Hey beautiful people!**  
 Tired of shift work getting in the way of hanging out with your favorite operators?  
@@ -21,7 +21,7 @@ Whether you're trying to plan a group dinner, some well-earned parties, or just 
 
 ## 👀 Schedule
 
-![Shift Schedule Preview](shift_schedule.png)
+![Shift Schedule Preview](nxt_shift_schedule.png)
 
 Our full 6-week rotation in living color:
 - **E** (Early Shift): Blue
