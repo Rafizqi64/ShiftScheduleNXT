@@ -237,4 +237,3 @@ if st.button("Show Shared Calendar"):
         annotated_df.style.applymap(highlight_cells),
         use_container_width=True
     )
-    st.download_button("Download CSV", annotated_df.to_csv(index=False), "shared_calendar.csv")
