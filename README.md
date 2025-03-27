@@ -1,4 +1,4 @@
-# 🌟 Shift Schedule Free Time Finder – *thank u, NXT edition* 🕒
+# thank u, NXT – *Shift Schedule Free Time Finder* 🕒
 
 **Hey beautiful people!**  
 Tired of shift work getting in the way of hanging out with your favorite operators?  
@@ -21,14 +21,19 @@ Whether you're trying to plan a group dinner, some well-earned parties, or just 
 
 ## 👀 Schedule
 
-![Shift Schedule Preview](shift_schedule.png)
+![Shift Schedule Preview](nxt_shift_schedule.png)
 
 Our full 6-week rotation in living color:
-- **E** (Early Shift): Blue
-- **D** (Day Shift): Green
-- **L** (Late Shift): Yellow
-- **N** (Night Shift): Orange
 
+| Code | Name       | Time Range   | Color     |
+|------|------------|--------------|-----------|
+| E    | Early      | 06:00–14:00  | 🔵 Blue    |
+| D    | Day        | 12:00–20:00  | 🟢 Green   |
+| L    | Late       | 18:00–02:00* | 🟡 Yellow  |
+| N    | Night      | 00:00–08:00  | 🔶 Orange  |
+
+> *Late shifts actually roll over to the next day!
+~~such a f@$%ing headache.~~
 ---
 
 ## 🚀 How to Run It
@@ -46,19 +51,6 @@ Our full 6-week rotation in living color:
 3. 🌐 A browser will open — choose how many people to compare and their shift codes. Done!
 
 Or try it deployed at: [thankunxt.streamlit.app](https://thankunxt.streamlit.app)
-
----
-
-## 🔠 Shift Types & Colors
-
-| Code | Name       | Time Range   | Color     |
-|------|------------|--------------|-----------|
-| E    | Early      | 06:00–14:00  | 🔵 Blue    |
-| D    | Day        | 12:00–20:00  | 🟢 Green   |
-| L    | Late       | 18:00–02:00* | 🟡 Yellow  |
-| N    | Night      | 00:00–08:00  | 🔶 Orange  |
-
-> ⭐ *Late shifts automatically extend into the next day (00:00–02:00)!*
 
 ---
 
