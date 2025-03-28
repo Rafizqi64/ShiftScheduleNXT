@@ -1,8 +1,8 @@
-# thank u, NXT – *Shift Schedule Free Time Finder* 🕒
+# thank u, NXT – *Free Time Calendar* 🕒
 
 **Hey beautiful people!**  
 Tired of shift work getting in the way of hanging out with your favorite operators?  
-This little Python + Streamlit app helps you **find shared free time** across rotating shifts.
+This little Python + Streamlit app helps you **find shared free time** in or across rotating shifts.
 
 Whether you're trying to plan a group dinner, some well-earned parties, or just need to vibe out with your crew — this tool finds when **you’re all actually free**.
 
