@@ -128,6 +128,12 @@ def apply_sleep_filters(busy_map):
             if i > 0:
                 busy_map[dates[i - 1]]["filters"].update(sleep_hours['E'])
 
+        # If tomorrow is a Regular (R) shift, sleep early today
+        if i + 1 < len(dates):
+            shifts_tomorrow = busy_map[dates[i + 1]]["shift"]
+            if 'R' in shifts_tomorrow:
+                busy_map[date]["filters"].update(set(range(0, 8)))
+
     return busy_map
 
 # Compute hours where all selected people are free
@@ -183,8 +189,11 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
             shift = ', '.join(people[person][date]["shift"]) or "-"
             shift_code = person[-2] if person[-2] != ' ' else 'R'
             day_record[f"Shift {shift_code}"] = f"{shift}"
-            person_index = (shift_to_week[shift_code] - 1 + (list(all_dates).index(date) // 7)) % 6 + 1
-            day_record[f"Week {shift_code}"] = f"Week {person_index}"
+            if shift_code != 'R':
+                person_index = (shift_to_week[shift_code] - 1 + (list(all_dates).index(date) // 7)) % 6 + 1
+                day_record[f"Week {shift_code}"] = f"Week {person_index}"
+            else:
+                day_record[f"Week {shift_code}"] = "-"
             shifts_today[shift_code] = shift
 
             # Look ahead to next day for N shifts
@@ -245,7 +254,7 @@ if st.button("Show Shared Calendar"):
             elif val.startswith('R'):
                 return 'background-color: #D3D3D3; color: #2F4F4F;'
         return ''
-        
+
     st.dataframe(
         annotated_df.style.applymap(highlight_cells),
         use_container_width=True
