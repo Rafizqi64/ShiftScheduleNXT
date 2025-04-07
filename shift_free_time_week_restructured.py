@@ -244,7 +244,6 @@ if st.button("Show Shared Calendar"):
             return 'background-color: #FFA07A; color: #8B0000;'
         elif val.startswith('R'):
             return 'background-color: #D3D3D3; color: #2F4F4F;'
-                return 'background-color: #FFA07A; color: #8B0000;'
         return ''
 
     st.dataframe(
