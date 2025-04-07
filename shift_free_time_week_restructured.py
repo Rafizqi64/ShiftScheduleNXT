@@ -13,14 +13,15 @@ shift_times = {
     'E': (6, 14),   # Early: 6am - 2pm
     'N': (0, 8),    # Night: 12am - 8am
     'D': (12, 20),  # Day: 12pm - 8pm
-    'L': (18, 2)    # Late: 6pm - 2am next day
+    'L': (18, 2),   # Late: 6pm - 2am next day
+    'R': (9, 17)    # Regular: 9am - 5pm (Mon–Fri only)
 }
 
 # Sleep time restrictions per shift type
 sleep_hours = {
-    'N': set(range(9, 18)),                         # Before and after shift sleep: 9am - 6pm
-    'L': set(range(3, 12)),                         # After shift sleep: 3am - 12pm
-    'E': set(range(22, 24)).union(range(0, 4))      # Before shift sleep: 10pm - 4am
+    'N': set(range(9, 18)),
+    'L': set(range(3, 12)),
+    'E': set(range(22, 24)).union(range(0, 4))
 }
 
 # Hours generally considered free for socializing
@@ -69,29 +70,39 @@ def expand_shift_hours(shift_code):
 
 # Build the busy schedule map per person based on their shift rotation
 def build_busy_map(person_shift_letter):
-    schedule = rotate_schedule(person_shift_letter)
     busy_by_date = {}
     dates = generate_dates()
 
-    for week_index, week_schedule in enumerate(schedule):
-        for day_index in range(DAYS_PER_WEEK):
-            date_index = week_index * DAYS_PER_WEEK + day_index
-            current_date = dates[date_index].date()
-            shifts_today = week_schedule.get(day_index, [])
-
-            busy_hours = set()
-            for shift in shifts_today:
-                busy_hours.update(expand_shift_hours(shift))
-
-            busy_by_date[current_date] = {
-                "shift": shifts_today,
-                "busy": busy_hours.copy(),
+    if person_shift_letter == 'R':
+        for date in dates:
+            weekday = date.weekday()
+            busy_hours = expand_shift_hours('R') if weekday < 5 else set()
+            busy_by_date[date.date()] = {
+                "shift": ['R'] if weekday < 5 else [],
+                "busy": busy_hours,
                 "filters": set()
             }
+    else:
+        schedule = rotate_schedule(person_shift_letter)
+        for week_index, week_schedule in enumerate(schedule):
+            for day_index in range(DAYS_PER_WEEK):
+                date_index = week_index * DAYS_PER_WEEK + day_index
+                current_date = dates[date_index].date()
+                shifts_today = week_schedule.get(day_index, [])
 
-    for date in [d.date() for d in dates]:
-        if date not in busy_by_date:
-            busy_by_date[date] = {"shift": [], "busy": set(), "filters": set()}
+                busy_hours = set()
+                for shift in shifts_today:
+                    busy_hours.update(expand_shift_hours(shift))
+
+                busy_by_date[current_date] = {
+                    "shift": shifts_today,
+                    "busy": busy_hours.copy(),
+                    "filters": set()
+                }
+
+        for date in [d.date() for d in dates]:
+            if date not in busy_by_date:
+                busy_by_date[date] = {"shift": [], "busy": set(), "filters": set()}
 
     return busy_by_date
 
@@ -170,7 +181,7 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
 
         for idx, person in enumerate(people):
             shift = ', '.join(people[person][date]["shift"]) or "-"
-            shift_code = person[-2]
+            shift_code = person[-2] if person[-2] != ' ' else 'R'
             day_record[f"Shift {shift_code}"] = f"{shift}"
             person_index = (shift_to_week[shift_code] - 1 + (list(all_dates).index(date) // 7)) % 6 + 1
             day_record[f"Week {shift_code}"] = f"Week {person_index}"
@@ -202,7 +213,7 @@ num_people = st.number_input("How many people?", min_value=1, max_value=6, value
 input_data = []
 
 for i in range(num_people):
-    shift = st.selectbox(f"Shift code for Person {i+1} (A–F)", options=list(shift_to_week.keys()), key=f"shift_{i}")
+    shift = st.selectbox(f"Shift code for Person {i+1} (A–F or R for regular)", options=list(shift_to_week.keys()) + ['R'], key=f"shift_{i}")
     input_data.append(shift)
 
 selected_date = st.date_input("Start from date", datetime(2025, 4, 28))
@@ -230,6 +241,9 @@ if st.button("Show Shared Calendar"):
             elif val.startswith('L'):
                 return 'background-color: #FFFF99; color: #8B8000;'
             elif val.startswith('N'):
+            return 'background-color: #FFA07A; color: #8B0000;'
+        elif val.startswith('R'):
+            return 'background-color: #D3D3D3; color: #2F4F4F;'
                 return 'background-color: #FFA07A; color: #8B0000;'
         return ''
 
@@ -237,3 +251,4 @@ if st.button("Show Shared Calendar"):
         annotated_df.style.applymap(highlight_cells),
         use_container_width=True
     )
+    st.download_button("Download CSV", annotated_df.to_csv(index=False), "shared_calendar.csv")
