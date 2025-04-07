@@ -241,11 +241,11 @@ if st.button("Show Shared Calendar"):
             elif val.startswith('L'):
                 return 'background-color: #FFFF99; color: #8B8000;'
             elif val.startswith('N'):
-            return 'background-color: #FFA07A; color: #8B0000;'
-        elif val.startswith('R'):
-            return 'background-color: #D3D3D3; color: #2F4F4F;'
+                return 'background-color: #FFA07A; color: #8B0000;'
+            elif val.startswith('R'):
+                return 'background-color: #D3D3D3; color: #2F4F4F;'
         return ''
-
+        
     st.dataframe(
         annotated_df.style.applymap(highlight_cells),
         use_container_width=True
