@@ -187,7 +187,7 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
 
         for idx, person in enumerate(people):
             shift = ', '.join(people[person][date]["shift"]) or "-"
-            shift_code = person[-2] if person[-2] != ' ' else 'R'
+            shift_code = person.split('(')[-1].strip(')')
             day_record[f"Shift {shift_code}"] = f"{shift}"
             if shift_code != 'R':
                 person_index = (shift_to_week[shift_code] - 1 + (list(all_dates).index(date) // 7)) % 6 + 1
