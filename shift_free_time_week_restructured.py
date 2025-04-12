@@ -48,14 +48,14 @@ shift_to_week = {
 }
 
 # Function to generate the full list of dates in the schedule
-def generate_dates():
-    return [START_DATE + timedelta(days=i) for i in range(NUM_WEEKS * DAYS_PER_WEEK)]
+def generate_dates(start_date, num_weeks=NUM_WEEKS):
+        return [start_date + timedelta(days=i) for i in range(num_weeks * DAYS_PER_WEEK)]
 
 # Given a shift letter, rotate the static schedule to match its start week
-def rotate_schedule(shift_letter):
+def rotate_schedule(shift_letter, num_weeks=NUM_WEEKS):
     start_week_index = shift_to_week[shift_letter] - 1
     full_schedule = []
-    for i in range(NUM_WEEKS):
+    for i in range(num_weeks):
         week_index = (start_week_index + i) % NUM_WEEKS
         full_schedule.append(static_schedule[week_index])
     return full_schedule
@@ -69,9 +69,11 @@ def expand_shift_hours(shift_code):
         return set(range(start, 24)).union(range(0, end))
 
 # Build the busy schedule map per person based on their shift rotation
-def build_busy_map(person_shift_letter):
+def build_busy_map(person_shift_letter, start_date):
     busy_by_date = {}
-    dates = generate_dates()
+    days_between = (start_date - START_DATE.date()).days
+    num_weeks_to_generate = NUM_WEEKS + max(0, days_between // 7)
+    dates = generate_dates(START_DATE, num_weeks=num_weeks_to_generate)
 
     if person_shift_letter == 'R':
         for date in dates:
@@ -83,7 +85,7 @@ def build_busy_map(person_shift_letter):
                 "filters": set()
             }
     else:
-        schedule = rotate_schedule(person_shift_letter)
+        schedule = rotate_schedule(person_shift_letter, num_weeks=num_weeks_to_generate)
         for week_index, week_schedule in enumerate(schedule):
             for day_index in range(DAYS_PER_WEEK):
                 date_index = week_index * DAYS_PER_WEEK + day_index
@@ -231,7 +233,7 @@ show_sleepover = st.checkbox("Show Sleepover Column", value=True)
 
 if st.button("Show Shared Calendar"):
     people = {
-        f"P{i+1} ({shift})": apply_sleep_filters(build_busy_map(shift))
+        f"P{i+1} ({shift})": apply_sleep_filters(build_busy_map(shift, selected_date))
         for i, shift in enumerate(input_data)
     }
     shared_free_times = compute_shared_free_times(people)
