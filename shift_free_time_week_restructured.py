@@ -227,7 +227,7 @@ for i in range(num_people):
     shift = st.selectbox(f"Shift code for Person {i+1} (A–F or R for regular)", options=list(shift_to_week.keys()) + ['R'], key=f"shift_{i}")
     input_data.append(shift)
 
-selected_date = st.date_input("Start from date", datetime(2025, 4, 28))
+selected_date = st.date_input("Start from date", max(datetime.today().date(), datetime(2025, 4, 28).date()))
 
 show_sleepover = st.checkbox("Show Sleepover Column", value=True)
 
