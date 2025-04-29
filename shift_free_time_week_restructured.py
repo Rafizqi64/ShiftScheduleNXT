@@ -243,6 +243,7 @@ for i in range(num_people):
 
 selected_date = st.date_input("Start from date", max(datetime.today().date(), datetime(2025, 4, 28).date()))
 
+show_weeks = st.checkbox("Show Week Columns", value=False)
 show_sleepover = st.checkbox("Show Sleepover Column", value=True)
 
 if st.button("Show Shared Calendar"):
@@ -252,8 +253,13 @@ if st.button("Show Shared Calendar"):
     }
     shared_free_times = compute_shared_free_times(people)
     annotated_df = annotate_schedule_with_shifts_and_weeks(people, shared_free_times, selected_date)
+
     if not show_sleepover and "Sleepover?" in annotated_df.columns:
         annotated_df = annotated_df.drop(columns=["Sleepover?"])
+
+    if not show_weeks:
+        week_cols = [col for col in annotated_df.columns if col.startswith("Week ")]
+        annotated_df = annotated_df.drop(columns=week_cols)
 
     def highlight_cells(val):
         if isinstance(val, str):
