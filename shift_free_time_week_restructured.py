@@ -14,7 +14,7 @@ shift_times = {
     'N': (0, 8),    # Night: 12am - 8am
     'D': (12, 20),  # Day: 12pm - 8pm
     'L': (18, 2),   # Late: 6pm - 2am next day
-    'R': (9, 17)    # Regular: 9am - 5pm (Mon–Fri only)
+    '9 to 5': (9, 17)    # Regular: 9am - 5pm (Mon–Fri only)
 }
 
 # Sleep time restrictions per shift type
@@ -75,12 +75,12 @@ def build_busy_map(person_shift_letter, start_date):
     num_weeks_to_generate = NUM_WEEKS + max(0, days_between // 7)
     dates = generate_dates(START_DATE, num_weeks=num_weeks_to_generate)
 
-    if person_shift_letter == 'R':
+    if person_shift_letter == '9 to 5':
         for date in dates:
             weekday = date.weekday()
-            busy_hours = expand_shift_hours('R') if weekday < 5 else set()
+            busy_hours = expand_shift_hours('9 to 5') if weekday < 5 else set()
             busy_by_date[date.date()] = {
-                "shift": ['R'] if weekday < 5 else [],
+                "shift": ['9 to 5'] if weekday < 5 else [],
                 "busy": busy_hours,
                 "filters": set()
             }
@@ -119,6 +119,12 @@ def apply_sleep_filters(busy_map):
             if i > 0:
                 busy_map[dates[i - 1]]["filters"].update(sleep_hours['N'])
 
+            # NEW: if tomorrow is a day off, remove late night filters
+            if i + 1 < len(dates):
+                shifts_tomorrow = busy_map[dates[i + 1]]["shift"]
+                if not shifts_tomorrow:
+                    busy_map[date]["filters"].difference_update({0, 1})
+
         if 'L' in shifts_today:
             if i + 1 < len(dates):
                 busy_map[dates[i + 1]]["filters"].update(sleep_hours['L'])
@@ -130,10 +136,9 @@ def apply_sleep_filters(busy_map):
             if i > 0:
                 busy_map[dates[i - 1]]["filters"].update(sleep_hours['E'])
 
-        # If tomorrow is a Regular (R) shift, sleep early today
         if i + 1 < len(dates):
             shifts_tomorrow = busy_map[dates[i + 1]]["shift"]
-            if 'R' in shifts_tomorrow:
+            if '9 to 5' in shifts_tomorrow:
                 busy_map[date]["filters"].update(set(range(0, 8)))
 
     return busy_map
@@ -161,8 +166,15 @@ def group_hours_to_ranges(hours):
     if not hours:
         return []
     hours = sorted(hours)
-    if hours[0] == 0 and hours[-1] == 23:
-        hours = hours + [h + 24 for h in hours if h < 2]
+
+    # Handle wrap-around from evening into early morning (e.g., 18–1)
+    wrapped = False
+    if 0 in hours or 1 in hours:
+        if any(h >= 18 for h in hours):
+            wrapped = True
+            hours += [h + 24 for h in hours if h < 2]  # shift early hours for correct grouping
+            hours = sorted(set(hours))
+
     ranges = []
     start = hours[0]
     for i in range(1, len(hours)):
@@ -171,9 +183,10 @@ def group_hours_to_ranges(hours):
             ranges.append(f"{start % 24}:00-{end % 24}:00")
             start = hours[i]
     ranges.append(f"{start % 24}:00-{(hours[-1] + 1) % 24}:00")
+
     return ranges
 
-# Generate annotated calendar with shifts, weeks, and shared free time
+# Generate annotated calendar with shifts and shared free time
 def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_from):
     annotated_output = []
     all_dates = sorted(next(iter(people.values())).keys())
@@ -191,20 +204,18 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
             shift = ', '.join(people[person][date]["shift"]) or "-"
             shift_code = person.split('(')[-1].strip(')')
             day_record[f"Shift {shift_code}"] = f"{shift}"
-            if shift_code != 'R':
+
+            if shift_code in shift_to_week:
                 person_index = (shift_to_week[shift_code] - 1 + (list(all_dates).index(date) // 7)) % 6 + 1
                 day_record[f"Week {shift_code}"] = f"Week {person_index}"
-            else:
-                day_record[f"Week {shift_code}"] = "-"
+
             shifts_today[shift_code] = shift
 
-            # Look ahead to next day for N shifts
             if i + 1 < len(filtered_dates):
                 next_day = filtered_dates[i + 1]
                 next_shift = ', '.join(people[person][next_day]["shift"]) or "-"
                 shifts_next_day[shift_code] = next_shift
 
-        # Sleepover logic: must include at least 20:00 and 1:00, and no N shifts next day
         sleepover_possible = (
             any(h in free_time for h in [20, 21, 22, 23, 0, 1]) and
             all('N' not in shifts_next_day.get(code, '') for code in shifts_next_day)
@@ -253,7 +264,7 @@ if st.button("Show Shared Calendar"):
                 return 'background-color: #FFFF99; color: #8B8000;'
             elif val.startswith('N'):
                 return 'background-color: #FFA07A; color: #8B0000;'
-            elif val.startswith('R'):
+            elif val.startswith('9'):
                 return 'background-color: #D3D3D3; color: #2F4F4F;'
         return ''
 
