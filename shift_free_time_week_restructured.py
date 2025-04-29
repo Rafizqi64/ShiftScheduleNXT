@@ -196,7 +196,7 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
     filtered_dates = [d for d in all_dates if d >= start_from]
 
     for i, date in enumerate(filtered_dates):
-        day_record = {"Date": f"{date.strftime('%A')} ({date})"}
+        day_record = {"Date": f"{date.strftime('%a')} ({date.strftime('%d-%b-%y')})"}
         free_time = shared_free_times.get(date, [])
         day_record["Shared Free Hours"] = ', '.join(group_hours_to_ranges(free_time)) if free_time else "No free hours"
 
@@ -241,7 +241,12 @@ for i in range(num_people):
     shift = st.selectbox(f"Shift code for Person {i+1} (A–F or 9 to 5)", options=list(shift_to_week.keys()) + ['9 to 5'], key=f"shift_{i}")
     input_data.append(shift)
 
-selected_date = st.date_input("Start from date", max(datetime.today().date(), datetime(2025, 4, 28).date()))
+selected_date = st.date_input(
+    "Start from date (dd-mm-yy)",
+    value=max(datetime.today().date(), datetime(2025, 4, 28).date()),
+    format="DD-MM-YYYY"
+)
+
 col1, col2 = st.columns(2)
 with col1:
     show_sleepover = st.checkbox("Show Sleepover Column", value=True)
