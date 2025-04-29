@@ -242,9 +242,11 @@ for i in range(num_people):
     input_data.append(shift)
 
 selected_date = st.date_input("Start from date", max(datetime.today().date(), datetime(2025, 4, 28).date()))
-
-show_weeks = st.checkbox("Show Week Columns", value=False)
-show_sleepover = st.checkbox("Show Sleepover Column", value=True)
+col1, col2 = st.columns(2)
+with col1:
+    show_sleepover = st.checkbox("Show Sleepover Column", value=True)
+with col2:
+    show_weeks = st.checkbox("Show Week Columns", value=False)
 
 if st.button("Show Shared Calendar"):
     people = {
