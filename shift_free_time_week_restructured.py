@@ -51,8 +51,11 @@ shift_to_week = {
 def generate_dates(start_date, num_weeks=NUM_WEEKS):
         return [start_date + timedelta(days=i) for i in range(num_weeks * DAYS_PER_WEEK)]
 
-# Given a shift letter, rotate the static schedule to match its start week
 def rotate_schedule(shift_letter, num_weeks=NUM_WEEKS):
+    if shift_letter == '9 to 5':
+        # 9 to 5 is a standard M-F workweek, no rotation needed
+        return [{} for _ in range(num_weeks)]
+    
     start_week_index = shift_to_week[shift_letter] - 1
     full_schedule = []
     for i in range(num_weeks):
