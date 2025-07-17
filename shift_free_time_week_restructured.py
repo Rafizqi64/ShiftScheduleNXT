@@ -29,22 +29,22 @@ usual_hours = set(range(10, 24)).union(range(0, 2))
 
 # The 6-week static schedule that rotates among shifts
 static_schedule = [
-    {0: ['D'], 1: ['D'], 2: ['D'], 3: [], 4: ['E'], 5: ['E'], 6: ['E']},
-    {0: [], 1: [], 2: [], 3: ['L'], 4: ['L'], 5: [], 6: ['N']},
-    {0: ['N'], 1: ['N'], 2: [], 3: ['D'], 4: ['D'], 5: [], 6: []},
-    {0: ['E'], 1: ['E'], 2: ['E'], 3: ['E'], 4: [], 5: ['L'], 6: ['L']},
-    {0: ['L'], 1: [], 2: ['N'], 3: ['N'], 4: [], 5: ['D'], 6: ['D']},
-    {0: [], 1: ['L'], 2: ['L'], 3: [], 4: ['N'], 5: ['N'], 6: []},
+    {0: ['D'], 1: ['L'], 2: [], 3: ['N'], 4: ['N'], 5: ['N'], 6: ['N']},
+    {0: [], 1: [], 2: [], 3: ['D'], 4: ['L'], 5: ['L'], 6: ['L']},
+    {0: ['L'], 1: [], 2: ['L'], 3: ['L'], 4: [], 5: [], 6: []},
+    {0: ['N'], 1: ['N'], 2: ['N'], 3: [], 4: [], 5: ['E'], 6: ['E']},
+    {0: ['E'], 1: ['D'], 2: ['D'], 3: [], 4: ['D'], 5: ['D'], 6: ['D']},
+    {0: [], 1: ['E'], 2: ['E'], 3: ['E'], 4: ['E'], 5: [], 6: []},
 ]
 
 # Map shift labels (A–F) to their respective starting weeks
 shift_to_week = {
-    'A': 5,
-    'B': 1,
+    'A': 1,
+    'B': 2,
     'C': 3,
-    'D': 6,
-    'E': 2,
-    'F': 4
+    'D': 4,
+    'E': 5,
+    'F': 6
 }
 
 # Function to generate the full list of dates in the schedule
@@ -243,7 +243,7 @@ for i in range(num_people):
 
 selected_date = st.date_input(
     "Start from date (dd-mm-yy)",
-    value=max(datetime.today().date(), datetime(2025, 4, 28).date()),
+    value=max(datetime.today().date(), datetime(2025, 8, 11).date()),
     format="DD-MM-YYYY"
 )
 
