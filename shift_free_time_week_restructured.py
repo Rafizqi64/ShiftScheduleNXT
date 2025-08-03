@@ -193,7 +193,8 @@ def group_hours_to_ranges(hours):
 def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_from):
     annotated_output = []
     all_dates = sorted(next(iter(people.values())).keys())
-    filtered_dates = [d for d in all_dates if d >= start_from]
+    min_date=datetime(2025, 8, 11).date()
+    filtered_dates = [d for d in all_dates if d >= start_from and d>= min_date]
 
     for i, date in enumerate(filtered_dates):
         day_record = {"Date": f"{date.strftime('%a')} ({date.strftime('%d-%b-%y')})"}
