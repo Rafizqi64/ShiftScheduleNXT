@@ -247,11 +247,9 @@ selected_date = st.date_input(
     format="DD-MM-YYYY"
 )
 
-col1, col2 = st.columns(2)
+col1 = st.columns(1)
 with col1:
     show_sleepover = st.checkbox("Show Sleepover Column", value=False)
-with col2:
-    show_weeks = st.checkbox("Show Week Columns", value=False)
 
 if st.button("Show Shared Calendar"):
     people = {
