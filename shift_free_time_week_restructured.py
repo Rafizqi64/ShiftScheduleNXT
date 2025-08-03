@@ -262,10 +262,6 @@ if st.button("Show Shared Calendar"):
     if not show_sleepover and "Sleepover?" in annotated_df.columns:
         annotated_df = annotated_df.drop(columns=["Sleepover?"])
 
-    if not show_weeks:
-        week_cols = [col for col in annotated_df.columns if col.startswith("Week ")]
-        annotated_df = annotated_df.drop(columns=week_cols)
-
     def highlight_cells(val):
         if isinstance(val, str):
             if ':00' in val:
@@ -282,6 +278,8 @@ if st.button("Show Shared Calendar"):
                 return 'background-color: #D3D3D3; color: #2F4F4F;'
         return ''
 
+    week_cols = [col for col in annotated_df.columns if col.startswith("Week ")]
+    annotated_df = annotated_df.drop(columns=week_cols) 
     st.dataframe(
         annotated_df.style.applymap(highlight_cells),
         use_container_width=True
