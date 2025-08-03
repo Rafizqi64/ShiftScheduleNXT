@@ -4,7 +4,7 @@ from collections import defaultdict
 import pandas as pd
 
 # Constants for scheduling logic
-START_DATE = datetime(2025, 4, 28)
+START_DATE = datetime(2025, 8, 11)
 NUM_WEEKS = 6
 DAYS_PER_WEEK = 7
 
