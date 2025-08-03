@@ -247,7 +247,7 @@ selected_date = st.date_input(
     format="DD-MM-YYYY"
 )
 
-col1 = st.columns(1)
+col1, = st.columns(1)
 with col1:
     show_sleepover = st.checkbox("Show Sleepover Column", value=False)
 
