@@ -231,7 +231,7 @@ def annotate_schedule_with_shifts_and_weeks(people, shared_free_times, start_fro
 
 # Streamlit user interface
 st.title("thank u, NXT: Free Time Calendar")
-st.image("nxt_shift_schedule.png", caption="Static 6-week Schedule", use_container_width=True)
+st.image("nxt_shift_schedule (1).png", caption="Static 6-week Schedule", use_container_width=True)
 st.write("Compare shifts and find overlapping free hours across 6 weeks.")
 
 num_people = st.number_input("How many people?", min_value=1, max_value=6, value=1)
